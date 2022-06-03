@@ -15,6 +15,7 @@ import java.util.Map;
 @RestController
 public class FilmController {
     private Map<Long, Film> films = new HashMap<>();
+    private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
     private long filmId = 1;
 
     private long generateId() {
@@ -34,8 +35,8 @@ public class FilmController {
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
         if (validate(film)) {
-            if(film.getId() != 0 && films.containsKey(film.getId())) {
-                films.put(film.getId(),film);
+            if (film.getId() != 0 && films.containsKey(film.getId())) {
+                films.put(film.getId(), film);
                 log.info("Film with id {} was updated", film.getId());
             } else {
                 film.setId(generateId());
@@ -58,7 +59,7 @@ public class FilmController {
         } else if (film.getDescription().length() > 200) {
             log.debug("Description is too long");
             throw new ValidationException("Description is too long");
-        } else if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        } else if (film.getReleaseDate().isBefore(MOVIE_BIRTHDAY)) {
             log.debug("Incorrect Release date");
             throw new ValidationException("Incorrect Release date");
         } else if (film.getId() < 0) {
