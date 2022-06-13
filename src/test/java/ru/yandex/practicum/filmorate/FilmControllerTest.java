@@ -375,7 +375,7 @@ public class FilmControllerTest {
             films.add(new Film(String.format("test%d", i), "desc",
                     LocalDate.of(2022, 1,1 + i),300L + i));
             users.add(new User(String.format("test%d@yandex.ru", i), String.format("test%d", i),
-                    LocalDate.of(1990 + i, 1,15)));
+                    LocalDate.of(1990 + i, 1,16)));
         }
         return Stream.of(Arguments.of(films, users));
     }
