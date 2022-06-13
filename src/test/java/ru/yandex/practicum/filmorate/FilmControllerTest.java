@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
@@ -18,7 +19,7 @@ public class FilmControllerTest {
     private final FilmController filmController;
 
     public FilmControllerTest() {
-        this.filmController = new FilmController();
+        this.filmController = new FilmController(new InMemoryFilmStorage());
     }
 
     @Test
