@@ -37,15 +37,14 @@ public class InMemoryUserStorage implements UserStorage {
                 users.put(user.getId(), user);
                 log.info("User with id {} was updated", user.getId());
             } else {
-                user.setId(generateId());
-                users.put(user.getId(), user);
-                log.info("User not found. User was added with id {}", user.getId());
+                log.info("User with id {} not found.", user.getId());
+                throw new UserNotFoundException(String.format("User with id %d wasn't found", user.getId()));
             }
         }
         return user;
     }
 
-    public List getUsers() {
+    public List<User> getUsers() {
         return new ArrayList(users.values());
     }
 
@@ -67,9 +66,6 @@ public class InMemoryUserStorage implements UserStorage {
         } else if (user.getBirthday().isAfter(LocalDate.now())) {
             log.debug("Incorrect birthday");
             throw new ValidationException("birthday");
-        } else if (user.getId() < 0) {
-            log.debug("Incorrect id");
-            throw new ValidationException("id");
         } else if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("Name has been changed to value {}", user.getLogin());
