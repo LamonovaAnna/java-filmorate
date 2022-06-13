@@ -34,7 +34,7 @@ public class FilmControllerTest {
     @Test
     void test1_createFilmWithCorrectParameters() throws ValidationException {
         Film film = new Film("test", "desc", LocalDate.of(2022, 1,12),
-                300);
+                300L);
 
         filmController.createFilm(film);
         film.setId(1);
@@ -59,19 +59,19 @@ public class FilmControllerTest {
     private static Stream<Arguments> test2MethodSource() {
         return Stream.of(
                 Arguments.of(new Film("", "desc",
-                                LocalDate.of(2022, 1,12),300),
+                                LocalDate.of(2022, 1,12),300L),
                                 "Incorrect parameter: name"),
                         Arguments.of(new Film("test", "In a small town where everyone knows " +
                                 "everyone, a peculiar incident starts a chain of events that leads to a child's " +
                                 "disappearance, which begins to tear at the fabric of an otherwise-peaceful " +
                                 "community. ", LocalDate.of(2022, 1,12),
-                                300),
+                                300L),
                                 "Incorrect parameter: description. Description is too long"),
                         Arguments.of(new Film("test", "desc",
-                                LocalDate.of(1822, 1,12),300),
+                                LocalDate.of(1822, 1,12),300L),
                                 "Incorrect parameter: release date"),
                         Arguments.of(new Film("test", "desc",
-                                LocalDate.of(2022, 1,12),-100),
+                                LocalDate.of(2022, 1,12),-100L),
                                 "Incorrect parameter: duration")
         );
     }
@@ -79,7 +79,7 @@ public class FilmControllerTest {
     @Test
     void test3_updateFilmWithCorrectId() throws ValidationException {
         final Film film = new Film("test", "desc", LocalDate.of(2022, 1,12),
-                300);
+                300L);
 
         filmController.createFilm(film);
         Film filmFromLibrary = filmController.getFilms().get(0);
@@ -94,7 +94,7 @@ public class FilmControllerTest {
     @Test
     void test4_updateFilmWithIncorrectId() throws ValidationException {
         final Film film = new Film("test", "desc", LocalDate.of(2022, 1,12),
-                300);
+                300L);
 
         filmController.createFilm(film);
         Film filmFromLibrary = filmController.getFilms().get(0);
@@ -112,7 +112,7 @@ public class FilmControllerTest {
     @Test
     void test5_updateFilmWithoutId() throws ValidationException {
         final Film film = new Film("test", "desc", LocalDate.of(2022, 1,12),
-                300);
+                300L);
 
         filmController.createFilm(film);
         Film filmFromLibrary = filmController.getFilms().get(0);
@@ -126,7 +126,7 @@ public class FilmControllerTest {
     @Test
     void test6_getFilms() throws ValidationException {
         final Film film = new Film("test", "desc", LocalDate.of(2022, 1,12),
-                300);
+                300L);
         filmController.createFilm(film);
         film.setId(1);
 
@@ -141,9 +141,9 @@ public class FilmControllerTest {
     @Test
     void test7_findFilmById() throws ValidationException {
         filmController.createFilm(new Film("test", "desc",
-                LocalDate.of(2022, 1,12),300));
+                LocalDate.of(2022, 1,12),300L));
         filmController.createFilm(new Film("test2", "desc",
-                LocalDate.of(2022, 1,23),8900));
+                LocalDate.of(2022, 1,23),8900L));
 
         Film returnedFilm = filmController.findFilmById(2);
 
@@ -155,7 +155,7 @@ public class FilmControllerTest {
     @Test
     void test8_findFilmByIncorrectId() throws ValidationException {
         filmController.createFilm(new Film("test", "desc",
-                LocalDate.of(2022, 1,12),300));
+                LocalDate.of(2022, 1,12),300L));
 
         final FilmNotFoundException exception = assertThrows(FilmNotFoundException.class,
                 () -> filmController.findFilmById(10));
@@ -167,7 +167,7 @@ public class FilmControllerTest {
     @Test
     void test9_addLike() throws ValidationException {
         filmController.createFilm(new Film("test", "desc",
-                LocalDate.of(2022, 1,12),300));
+                LocalDate.of(2022, 1,12),300L));
         userStorage.createUser(new User("test@yandex.ru", "test",
                 LocalDate.of(1990, 1,15)));
         userStorage.createUser(new User("test2@yandex.ru", "test2",
@@ -186,7 +186,7 @@ public class FilmControllerTest {
     @Test
     void test10_addLikeToIncorrectFilm() throws ValidationException {
         filmController.createFilm(new Film("test", "desc",
-                LocalDate.of(2022, 1,12),300));
+                LocalDate.of(2022, 1,12),300L));
         userStorage.createUser(new User("test@yandex.ru", "test",
                 LocalDate.of(1990, 1,15)));
 
@@ -200,7 +200,7 @@ public class FilmControllerTest {
     @Test
     void test11_addLikeByIncorrectUser() throws ValidationException {
         filmController.createFilm(new Film("test", "desc",
-                LocalDate.of(2022, 1,12),300));
+                LocalDate.of(2022, 1,12),300L));
         userStorage.createUser(new User("test@yandex.ru", "test",
                 LocalDate.of(1990, 1,15)));
 
@@ -215,7 +215,7 @@ public class FilmControllerTest {
     @Test
     void test12_deleteLike() throws ValidationException {
         filmController.createFilm(new Film("test", "desc",
-                LocalDate.of(2022, 1,12),300));
+                LocalDate.of(2022, 1,12),300L));
         userStorage.createUser(new User("test@yandex.ru", "test",
                 LocalDate.of(1990, 1,15)));
         userStorage.createUser(new User("test2@yandex.ru", "test2",
@@ -373,7 +373,7 @@ public class FilmControllerTest {
         List<User> users = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             films.add(new Film(String.format("test%d", i), "desc",
-                    LocalDate.of(2022, 1,1 + i),300 + i));
+                    LocalDate.of(2022, 1,1 + i),300L + i));
             users.add(new User(String.format("test%d@yandex.ru", i), String.format("test%d", i),
                     LocalDate.of(1990 + i, 1,15)));
         }

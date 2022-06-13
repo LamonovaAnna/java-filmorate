@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,7 @@ import java.util.Map;
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private Map<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
     private long userId = 1;
 
     private long generateId() {
@@ -49,7 +48,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public List<User> getUsers() {
-        return new ArrayList(users.values());
+        return List.copyOf(users.values());
     }
 
     public User findById(long id) {

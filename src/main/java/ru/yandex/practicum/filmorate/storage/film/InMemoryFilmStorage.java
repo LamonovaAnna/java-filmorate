@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.Map;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private Map<Long, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
     private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
     private long filmId = 1;
 
@@ -50,7 +49,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     public List<Film> getFilms() {
-        return new ArrayList(films.values());
+        return List.copyOf(films.values());
     }
 
     public Film findFilmById(long id) {
