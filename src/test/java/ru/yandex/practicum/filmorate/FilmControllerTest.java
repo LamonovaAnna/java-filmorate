@@ -6,10 +6,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
@@ -19,9 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
     private final FilmController filmController;
+    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
 
     public FilmControllerTest() {
-        this.filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
+        this.filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), userStorage));
     }
 
     @Test
@@ -155,5 +160,53 @@ public class FilmControllerTest {
         assertEquals("Film with id 10 not found", exception.getMessage(), "Incorrect message");
         assertThrows(FilmNotFoundException.class, () -> filmController.findFilmById(10),
                 "Incorrect exception");
+    }
+
+    @Test
+    void test9_addLike() throws ValidationException {
+        filmController.createFilm(new Film("test", "desc",
+                LocalDate.of(2022, 1,12),300));
+        userStorage.createUser(new User("test@yandex.ru", "test",
+                LocalDate.of(1990, 1,15)));
+        userStorage.createUser(new User("test2@yandex.ru", "test2",
+                LocalDate.of(1991, 1,15)));
+
+        filmController.addLike(1, 1);
+        filmController.addLike(1, 2);
+
+        Long[] expectedList = {1L, 2L};
+
+        assertEquals(2, filmController.findFilmById(1).getLikes().size(), "Incorrect list size");
+        assertArrayEquals(expectedList, filmController.findFilmById(1).getLikes().toArray(),
+                "Arrays don't match");
+    }
+
+    @Test
+    void test10_addLikeToIncorrectFilm() throws ValidationException {
+        filmController.createFilm(new Film("test", "desc",
+                LocalDate.of(2022, 1,12),300));
+        userStorage.createUser(new User("test@yandex.ru", "test",
+                LocalDate.of(1990, 1,15)));
+
+        final FilmNotFoundException exception = assertThrows(FilmNotFoundException.class,
+                () -> filmController.addLike(10,1));
+        assertEquals("Film with id 10 not found", exception.getMessage(), "Incorrect message");
+        assertThrows(FilmNotFoundException.class, () -> filmController.addLike(10,1),
+                "Incorrect exception");
+    }
+
+    @Test
+    void test11_addLikeByIncorrectUser() throws ValidationException {
+        filmController.createFilm(new Film("test", "desc",
+                LocalDate.of(2022, 1,12),300));
+        userStorage.createUser(new User("test@yandex.ru", "test",
+                LocalDate.of(1990, 1,15)));
+
+        final UserNotFoundException exception = assertThrows(UserNotFoundException.class,
+                () -> filmController.addLike(1,10));
+        assertEquals("User with id 10 wasn't found", exception.getMessage(), "Incorrect message");
+        assertThrows(UserNotFoundException.class, () -> filmController.addLike(1,10),
+                "Incorrect exception");
+        assertTrue(filmController.findFilmById(1).getLikes().isEmpty(), "Incorrect number of likes");
     }
 }

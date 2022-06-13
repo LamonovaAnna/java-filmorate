@@ -30,7 +30,7 @@ public class UserControllerTest {
 
         userController.createUser(user);
         user.setId(1L);
-        User userFromLibrary = (User) userController.getUsers().get(0);
+        User userFromLibrary = userController.getUsers().get(0);
 
         assertNotNull(userFromLibrary, "User not found");
         assertEquals(user, userFromLibrary, "User's don't match");
@@ -70,13 +70,13 @@ public class UserControllerTest {
         User user = new User("test@yandex.ru", "test", LocalDate.of(1990, 1,15));
 
         userController.createUser(user);
-        User userFromLibrary = (User) userController.getUsers().get(0);
+        User userFromLibrary = userController.getUsers().get(0);
         userFromLibrary.setName("testName");
         userController.updateUser(userFromLibrary);
 
-        assertEquals("testName", ((User) userController.getUsers().get(0)).getName(),
+        assertEquals("testName", (userController.getUsers().get(0)).getName(),
                 "Incorrect user name");
-        assertEquals(userFromLibrary.getName(), ((User) userController.getUsers().get(0)).getName(),
+        assertEquals(userFromLibrary.getName(), (userController.getUsers().get(0)).getName(),
                 "Incorrect user name");
         assertEquals(1, userController.getUsers().size(), "Invalid number of users");
     }

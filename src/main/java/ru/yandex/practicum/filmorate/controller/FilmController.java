@@ -42,5 +42,13 @@ public class FilmController {
         return filmService.getFilmStorage().findFilmById(id);
     }
 
-    @PutMapping("findFilmById")
+    @PutMapping("/films/{id}/like/{userId}")
+    public void addLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.addLike(id, userId);
+    }
+
+
+
+
+
 }
