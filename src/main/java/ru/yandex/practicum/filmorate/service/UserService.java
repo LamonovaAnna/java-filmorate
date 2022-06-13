@@ -49,9 +49,13 @@ public class UserService {
         }
     }
 
-    public List<Long> getFriends(long id) {
+    public List<User> getFriends(long id) {
+        List<User> friends = new ArrayList<>();
         if (userStorage.findById(id) != null && !userStorage.findById(id).getFriends().isEmpty()) {
-            return List.copyOf(userStorage.findById(id).getFriends());
+            for(long friendId : userStorage.findById(id).getFriends()){
+                friends.add(userStorage.findById(friendId));
+            }
+            return friends;
         } else {
             return null;
         }

@@ -5,8 +5,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
@@ -19,7 +21,7 @@ public class FilmControllerTest {
     private final FilmController filmController;
 
     public FilmControllerTest() {
-        this.filmController = new FilmController(new InMemoryFilmStorage());
+        this.filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
     }
 
     @Test
@@ -29,7 +31,7 @@ public class FilmControllerTest {
 
         filmController.createFilm(film);
         film.setId(1);
-        Film filmFromLibrary = (Film) filmController.getFilms().get(0);
+        Film filmFromLibrary = filmController.getFilms().get(0);
 
         assertNotNull(filmFromLibrary, "Film not found");
         assertEquals(film, filmFromLibrary, "Films don't match");
@@ -51,19 +53,19 @@ public class FilmControllerTest {
         return Stream.of(
                 Arguments.of(new Film("", "desc",
                                 LocalDate.of(2022, 1,12),300),
-                                "Incorrect film name"),
+                                "Incorrect parameter: name"),
                         Arguments.of(new Film("test", "In a small town where everyone knows " +
                                 "everyone, a peculiar incident starts a chain of events that leads to a child's " +
                                 "disappearance, which begins to tear at the fabric of an otherwise-peaceful " +
                                 "community. ", LocalDate.of(2022, 1,12),
                                 300),
-                                "Description is too long"),
+                                "Incorrect parameter: description. Description is too long"),
                         Arguments.of(new Film("test", "desc",
                                 LocalDate.of(1822, 1,12),300),
-                                "Incorrect Release date"),
+                                "Incorrect parameter: release date"),
                         Arguments.of(new Film("test", "desc",
                                 LocalDate.of(2022, 1,12),-100),
-                                "Incorrect duration")
+                                "Incorrect parameter: duration")
         );
     }
 
@@ -88,14 +90,14 @@ public class FilmControllerTest {
                 300);
 
         filmController.createFilm(film);
-        Film filmFromLibrary = (Film) filmController.getFilms().get(0);
+        Film filmFromLibrary = filmController.getFilms().get(0);
         filmFromLibrary.setName("updateName");
         filmFromLibrary.setId(-10);
 
-        final ValidationException exception = assertThrows(ValidationException.class,
+        final FilmNotFoundException exception = assertThrows(FilmNotFoundException.class,
                 () -> filmController.updateFilm(filmFromLibrary));
-        assertEquals("Incorrect id", exception.getMessage(), "Incorrect message");
-        assertThrows(ValidationException.class, () -> filmController.updateFilm(filmFromLibrary),
+        assertEquals("Film with id -10 not found", exception.getMessage(), "Incorrect message");
+        assertThrows(FilmNotFoundException.class, () -> filmController.updateFilm(filmFromLibrary),
                 "Incorrect exception");
         assertEquals(1, filmController.getFilms().size(), "Incorrect number of films");
     }
@@ -106,7 +108,7 @@ public class FilmControllerTest {
                 300);
 
         filmController.createFilm(film);
-        Film filmFromLibrary = (Film) filmController.getFilms().get(0);
+        Film filmFromLibrary = filmController.getFilms().get(0);
         filmFromLibrary.setName("updateName");
         filmFromLibrary.setId(0);
         filmController.updateFilm(filmFromLibrary);
@@ -127,5 +129,31 @@ public class FilmControllerTest {
         assertArrayEquals(expectedFilms, filmController.getFilms().toArray(new Film[0]),
                 "Arrays aren't match");
         assertEquals(1, filmController.getFilms().size(), "Invalid number of films");
+    }
+
+    @Test
+    void test7_findFilmById() throws ValidationException {
+        filmController.createFilm(new Film("test", "desc",
+                LocalDate.of(2022, 1,12),300));
+        filmController.createFilm(new Film("test2", "desc",
+                LocalDate.of(2022, 1,23),8900));
+
+        Film returnedFilm = filmController.findFilmById(2);
+
+        assertEquals(2, returnedFilm.getId(), "Incorrect film id");
+        assertEquals(8900, returnedFilm.getDuration(), "Incorrect film duration");
+        assertEquals("test2", returnedFilm.getName(), "Incorrect film name");
+    }
+
+    @Test
+    void test8_findFilmByIncorrectId() throws ValidationException {
+        filmController.createFilm(new Film("test", "desc",
+                LocalDate.of(2022, 1,12),300));
+
+        final FilmNotFoundException exception = assertThrows(FilmNotFoundException.class,
+                () -> filmController.findFilmById(10));
+        assertEquals("Film with id 10 not found", exception.getMessage(), "Incorrect message");
+        assertThrows(FilmNotFoundException.class, () -> filmController.findFilmById(10),
+                "Incorrect exception");
     }
 }

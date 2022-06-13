@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -37,35 +38,42 @@ public class InMemoryFilmStorage implements FilmStorage {
             if (film.getId() != 0 && films.containsKey(film.getId())) {
                 films.put(film.getId(), film);
                 log.info("Film with id {} was updated", film.getId());
-            } else {
+            } else if (film.getId() == 0) {
                 film.setId(generateId());
                 films.put(film.getId(), film);
                 log.info("Film not found in library. The film was added with id {}", film.getId());
+            } else {
+                throw new FilmNotFoundException(String.format("Film with id %d not found", film.getId()));
             }
         }
         return film;
     }
 
-    public List getFilms() {
+    public List<Film> getFilms() {
         return new ArrayList(films.values());
+    }
+
+    public Film findFilmById(long id) {
+        if (!films.containsKey(id)) {
+            log.debug("Incorrect id");
+            throw new FilmNotFoundException(String.format("Film with id %d not found", id));
+        }
+        return films.get(id);
     }
 
     private boolean validate(Film film) throws ValidationException {
         if (film.getName().isBlank()) {
             log.debug("Incorrect film name");
-            throw new ValidationException("Incorrect film name");
+            throw new ValidationException("name");
         } else if (film.getDescription().length() > 200) {
             log.debug("Description is too long");
-            throw new ValidationException("Description is too long");
+            throw new ValidationException("description. Description is too long");
         } else if (film.getReleaseDate().isBefore(MOVIE_BIRTHDAY)) {
-            log.debug("Incorrect Release date");
-            throw new ValidationException("Incorrect Release date");
-        } else if (film.getId() < 0) {
-            log.debug("Incorrect id");
-            throw new ValidationException("Incorrect id");
+            log.debug("date");
+            throw new ValidationException("release date");
         } else if (film.getDuration() <= 0) {
             log.debug("Incorrect duration");
-            throw new ValidationException("Incorrect duration");
+            throw new ValidationException("duration");
         }
         return true;
     }

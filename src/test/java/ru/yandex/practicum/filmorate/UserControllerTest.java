@@ -86,14 +86,14 @@ public class UserControllerTest {
         User user = new User("test@yandex.ru", "test", LocalDate.of(1990, 1,15));
 
         userController.createUser(user);
-        User userFromLibrary = (User) userController.getUsers().get(0);
+        User userFromLibrary = userController.getUsers().get(0);
         userFromLibrary.setName("updateName");
-        userFromLibrary.setId(-10L);
+        userFromLibrary.setId(-10);
 
-        final ValidationException exception = assertThrows(ValidationException.class,
+        final UserNotFoundException exception = assertThrows(UserNotFoundException.class,
                 () -> userController.updateUser(userFromLibrary));
-        assertEquals("Incorrect parameter: id", exception.getMessage(), "Incorrect message");
-        assertThrows(ValidationException.class, () -> userController.updateUser(userFromLibrary),
+        assertEquals("User with id -10 wasn't found", exception.getMessage(), "Incorrect message");
+        assertThrows(UserNotFoundException.class, () -> userController.updateUser(userFromLibrary),
                 "Incorrect exception");
         assertEquals(1, userController.getUsers().size(), "Incorrect number of users");
     }
@@ -103,7 +103,7 @@ public class UserControllerTest {
         User user = new User("test@yandex.ru", "test", LocalDate.of(1990, 1,15));
 
         userController.createUser(user);
-        User userFromLibrary = (User) userController.getUsers().get(0);
+        User userFromLibrary = userController.getUsers().get(0);
         userFromLibrary.setName("updateName");
         userFromLibrary.setId(0L);
         userController.updateUser(userFromLibrary);
@@ -275,7 +275,7 @@ public class UserControllerTest {
 
         userController.addFriend(1,2);
 
-        Long[] expectedList = {2L};
+        User[] expectedList = {userController.findUserById(2)};
 
         assertNotNull(userController.getFriends(1), "List wasn't returned");
         assertArrayEquals(expectedList, userController.getFriends(1).toArray(), "Arrays aren't match");

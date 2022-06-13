@@ -11,5 +11,7 @@ public interface FilmStorage {
 
     Film updateFilm(Film film) throws ValidationException;
 
-    List getFilms();
+    List<Film> getFilms();
+
+    Film findFilmById(long id);
 }

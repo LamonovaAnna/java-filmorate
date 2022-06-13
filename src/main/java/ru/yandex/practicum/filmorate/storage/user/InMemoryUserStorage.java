@@ -36,6 +36,10 @@ public class InMemoryUserStorage implements UserStorage {
             if (user.getId() != 0 && users.containsKey(user.getId())) {
                 users.put(user.getId(), user);
                 log.info("User with id {} was updated", user.getId());
+            } else if(user.getId() == 0) {
+                user.setId(generateId());
+                users.put(user.getId(), user);
+                log.info("User with id {} not found. Instead of updating the user was created", user.getId());
             } else {
                 log.info("User with id {} not found.", user.getId());
                 throw new UserNotFoundException(String.format("User with id %d wasn't found", user.getId()));
