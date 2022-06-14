@@ -21,6 +21,7 @@ public class InMemoryUserStorage implements UserStorage {
         return userId++;
     }
 
+    @Override
     public User createUser(User user) throws ValidationException {
         if (validate(user)) {
             user.setId(generateId());
@@ -30,6 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
+    @Override
     public User updateUser(User user) throws ValidationException {
         if (validate(user)) {
             if (user.getId() != 0 && users.containsKey(user.getId())) {
@@ -47,10 +49,12 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
+    @Override
     public List<User> getUsers() {
         return List.copyOf(users.values());
     }
 
+    @Override
     public User findById(long id) {
         if (!users.containsKey(id)) {
             log.debug("Incorrect id");

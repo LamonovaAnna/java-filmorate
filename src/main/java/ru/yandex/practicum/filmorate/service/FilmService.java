@@ -32,12 +32,14 @@ public class FilmService {
     public void addLike(long id, long userId) {
         if (filmStorage.findFilmById(id) != null && userStorage.findById(userId) != null) {
             filmStorage.findFilmById(id).getLikes().add(userId);
+            log.info("User with id {} liked film with id {}", userId, id);
         }
     }
 
     public void deleteLike(long id, long userId) {
         if (filmStorage.findFilmById(id) != null && userStorage.findById(userId) != null) {
             filmStorage.findFilmById(id).getLikes().remove(userId);
+            log.info("User with id {} deleted like for film with id {}", userId, id);
         }
     }
 

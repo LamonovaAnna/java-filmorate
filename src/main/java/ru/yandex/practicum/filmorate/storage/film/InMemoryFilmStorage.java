@@ -23,6 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return filmId++;
     }
 
+    @Override
     public Film createFilm(Film film) throws ValidationException {
         if (validate(film)) {
             film.setId(generateId());
@@ -32,6 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public Film updateFilm(Film film) throws ValidationException {
         if (validate(film)) {
             if (film.getId() != 0 && films.containsKey(film.getId())) {
@@ -48,10 +50,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public List<Film> getFilms() {
         return List.copyOf(films.values());
     }
 
+    @Override
     public Film findFilmById(long id) {
         if (!films.containsKey(id)) {
             log.debug("Incorrect id");

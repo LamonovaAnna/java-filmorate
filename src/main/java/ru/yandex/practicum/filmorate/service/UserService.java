@@ -28,22 +28,22 @@ public class UserService {
     public void addFriend(long id, long friendId) {
         if (userStorage.findById(id) != null && userStorage.findById(friendId) != null) {
             userStorage.findById(id).getFriends().add(friendId);
-            log.info(String.format("Friend with id %d was added for user with id %d", friendId, id));
+            log.info("Friend with id {} was added for user with id {}", friendId, id);
 
             userStorage.findById(friendId).getFriends().add(id);
-            log.info(String.format("Friend with id %d was added for user with id %d", id, friendId));
+            log.info("Friend with id {} was added for user with id {}", id, friendId);
         }
     }
 
     public void deleteFriend(long id, long friendId) {
         if (userStorage.findById(id) != null && userStorage.findById(id).getFriends().contains(friendId)) {
             userStorage.findById(id).getFriends().remove(friendId);
-            log.info(String.format("Friend with id %d was deleted from user list", friendId));
+            log.info("Friend with id {} was deleted from user list", friendId);
 
             userStorage.findById(friendId).getFriends().remove(id);
-            log.info(String.format("Friend with id %d was deleted from user list", id));
+            log.info("Friend with id {} was deleted from user list", id);
         } else {
-            log.info(String.format("Incorrect friend id %d", friendId));
+            log.info("Incorrect friend id {}", friendId);
             throw new UserNotFoundException(
                     String.format("Impossible to remove user with id %d from friends list. User not found", friendId));
         }
