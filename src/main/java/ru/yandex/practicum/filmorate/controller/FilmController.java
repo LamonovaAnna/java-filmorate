@@ -1,74 +1,65 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Slf4j
+
+
 @RestController
 public class FilmController {
-    private Map<Long, Film> films = new HashMap<>();
-    private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
-    private long filmId = 1;
+    private final FilmService filmService;
 
-    private long generateId() {
-        return filmId++;
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
+
 
     @PostMapping("/films")
     public Film createFilm(@RequestBody Film film) throws ValidationException {
-        if (validate(film)) {
-            film.setId(generateId());
-            films.put(film.getId(), film);
-        }
-        log.info("Film was created with id {}", film.getId());
-        return film;
+        return filmService.getFilmStorage().createFilm(film);
     }
 
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
-        if (validate(film)) {
-            if (film.getId() != 0 && films.containsKey(film.getId())) {
-                films.put(film.getId(), film);
-                log.info("Film with id {} was updated", film.getId());
-            } else {
-                film.setId(generateId());
-                films.put(film.getId(), film);
-                log.info("Film not found in library. The film was added with id {}", film.getId());
-            }
-        }
-        return film;
+        return filmService.getFilmStorage().updateFilm(film);
     }
 
     @GetMapping("/films")
-    public List getFilms() {
-        return new ArrayList(films.values());
+    public List<Film> getFilms() {
+        return filmService.getFilmStorage().getFilms();
     }
 
-    private boolean validate(Film film) throws ValidationException {
-        if (film.getName().isBlank()) {
-            log.debug("Incorrect film name");
-            throw new ValidationException("Incorrect film name");
-        } else if (film.getDescription().length() > 200) {
-            log.debug("Description is too long");
-            throw new ValidationException("Description is too long");
-        } else if (film.getReleaseDate().isBefore(MOVIE_BIRTHDAY)) {
-            log.debug("Incorrect Release date");
-            throw new ValidationException("Incorrect Release date");
-        } else if (film.getId() < 0) {
-            log.debug("Incorrect id");
-            throw new ValidationException("Incorrect id");
-        } else if (film.getDuration() <= 0) {
-            log.debug("Incorrect duration");
-            throw new ValidationException("Incorrect duration");
-        }
-        return true;
+    @GetMapping("/films/{id}")
+    public Film findFilmById(@PathVariable long id) {
+        return filmService.getFilmStorage().findFilmById(id);
     }
+
+    @PutMapping("/films/{id}/like/{userId}")
+    public void addLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/films/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        if (count <= 0) {
+            throw new IncorrectParameterException(String.format("count %d", count));
+        }
+        return filmService.getPopularFilms(count);
+    }
+
+
+
+
 }
