@@ -284,7 +284,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void test14_getCommonFriends() throws ValidationException {
+    void test15_getCommonFriends() throws ValidationException {
         userController.createUser(new User("test@yandex.ru", "test",
                 LocalDate.of(1990, 1,15)));
         userController.createUser(new User("test2@yandex.ru", "test2",

@@ -343,7 +343,7 @@ public class FilmControllerTest {
 
     @MethodSource("getPopularFilmsMethodSource")
     @ParameterizedTest
-    void test14_getPopularFilmsIfCountIsIncorrect(List<Film> films, List<User> users) throws ValidationException {
+    void test15_getPopularFilmsIfCountIsIncorrect(List<Film> films, List<User> users) throws ValidationException {
         for (int i = 1; i < 6; i++) {        // Add films in storage
             filmController.createFilm(films.get(i));
         }
