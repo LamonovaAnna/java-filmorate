@@ -64,6 +64,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
+    public void deleteFilm(long id) {
+        films.remove(id);
+    }
+
     private boolean validate(Film film) throws ValidationException {
         if (film.getName().isBlank()) {
             log.debug("Incorrect film name");
