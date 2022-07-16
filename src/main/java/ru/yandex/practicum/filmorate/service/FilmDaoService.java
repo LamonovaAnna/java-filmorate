@@ -12,6 +12,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.constant.Constant.*;
+
 @Slf4j
 @Service
 public class FilmDaoService {
@@ -50,29 +52,19 @@ public class FilmDaoService {
 
     public void addLike(long id, long userId) {
         if (filmStorage.findFilmById(id) != null && userStorage.findUserById(userId) != null) {
-            String sqlQuery = "INSERT INTO film_likes" +
-                    " (film_id, user_id)" +
-                    " VALUES (?, ?)";
-            jdbcTemplate.update(sqlQuery, id, userId);
+            jdbcTemplate.update(QUERY_ADD_LIKE_TO_FILM, id, userId);
             log.info("User with id {} liked film with id {}", userId, id);
         }
     }
 
     public void deleteLike(long id, long userId) {
         if (filmStorage.findFilmById(id) != null && userStorage.findUserById(userId) != null) {
-            String sqlQuery = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
-            jdbcTemplate.update(sqlQuery, id, userId);
+            jdbcTemplate.update(QUERY_DELETE_FROM_FILM, id, userId);
             log.info("User with id {} deleted like for film with id {}", userId, id);
         }
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        String sqlQuery = "SELECT f.* " +
-                "FROM films AS f " +
-                "LEFT JOIN film_likes AS fl ON f.film_id=fl.film_id " +
-                "GROUP BY f.film_id " +
-                "ORDER BY COUNT(fl.user_id) DESC " +
-                "LIMIT ?";
-        return jdbcTemplate.query(sqlQuery, RowTo::mapRowToFilm, count);
+        return jdbcTemplate.query(QUERY_GET_POPULAR_FILMS, RowTo::mapRowToFilm, count);
     }
 }

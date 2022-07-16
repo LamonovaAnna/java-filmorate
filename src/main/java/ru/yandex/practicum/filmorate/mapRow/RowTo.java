@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 
+import static ru.yandex.practicum.filmorate.constant.Constant.*;
+
 @Component
 public class RowTo {
 
@@ -23,10 +25,6 @@ public class RowTo {
     }
 
     public static Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        String sqlQueryMpa = "SELECT * FROM mpa_ratings WHERE mpa_rating_id = ?";
-        String sqlQueryGenre = "SELECT * FROM genres JOIN film_genres " +
-                "AS fg ON genres.genre_id = fg.genre_id  " +
-                "WHERE fg.film_id = ?";
         return Film.builder()
                 .id(resultSet.getLong("film_id"))
                 .name(resultSet.getString("film_name"))
@@ -34,9 +32,9 @@ public class RowTo {
                 .rate(resultSet.getInt("rate"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getLong("duration"))
-                .mpa(jdbcTemplate.queryForObject(sqlQueryMpa, RowTo::mapRowToMpa,
+                .mpa(jdbcTemplate.queryForObject(QUERY_GET_MPA_BY_ID, RowTo::mapRowToMpa,
                         resultSet.getInt("mpa_rating_id")))
-                .genres(new LinkedHashSet<>(jdbcTemplate.query(sqlQueryGenre, RowTo::mapRowToGenre,
+                .genres(new LinkedHashSet<>(jdbcTemplate.query(QUERY_GET_GENRE_BY_FILM_ID, RowTo::mapRowToGenre,
                         resultSet.getLong("film_id"))))
                 .build();
     }

@@ -12,6 +12,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.constant.Constant.*;
+
 @Slf4j
 @Service
 public class UserDaoService {
@@ -47,18 +49,14 @@ public class UserDaoService {
 
     public void addFriend(long id, long friendId) {
         if (userStorage.findUserById(id) != null && userStorage.findUserById(friendId) != null) {
-            String sqlQuery = "INSERT INTO friends" +
-                    " (request_user_id, accept_user_id, is_accepted)" +
-                    " VALUES (?, ?, ?)";
-            jdbcTemplate.update(sqlQuery, id, friendId, "true");
+            jdbcTemplate.update(QUERY_ADD_FRIEND, id, friendId, "true");
             log.info("Friend with id {} was added for user with id {}", friendId, id);
         }
     }
 
     public void deleteFriend(long id, long friendId) {
         if (findUserById(id) != null && getFriends(id).contains(findUserById(friendId))) {
-            String sqlQuery = "DELETE FROM friends WHERE request_user_id = ? AND accept_user_id = ?";
-            jdbcTemplate.update(sqlQuery, id, friendId);
+            jdbcTemplate.update(QUERY_DELETE_FRIEND, id, friendId);
             log.info("Friend with id {} was deleted from user list", id);
         } else {
             log.info("Incorrect friend id {}", friendId);
@@ -69,27 +67,13 @@ public class UserDaoService {
 
     public List<User> getFriends(long id) {
         if (userStorage.findUserById(id) != null) {
-            String sqlQuery = "SELECT * " +
-                    "FROM users " +
-                    "WHERE user_id IN (SELECT accept_user_id " +
-                    "FROM friends " +
-                    "WHERE request_user_id=?)";
-            return jdbcTemplate.query(sqlQuery, RowTo::mapRowToUser, id);
+            return jdbcTemplate.query(GET_ALL_FRIENDS, RowTo::mapRowToUser, id);
         } else {
             return null;
         }
     }
 
     public List<User> getCommonFriends(long id, long otherId) {
-       String sqlQuery = "SELECT * " +
-               "FROM users " +
-               "WHERE user_id IN (SELECT accept_user_id " +
-               "FROM friends " +
-               "WHERE request_user_id=? " +
-               "AND accept_user_id IN " +
-               "(SELECT accept_user_id " +
-               "FROM friends " +
-               "WHERE request_user_id=?))";
-        return jdbcTemplate.query(sqlQuery, RowTo::mapRowToUser, id, otherId);
+        return jdbcTemplate.query(QUERY_GET_COMMON_FRIENDS, RowTo::mapRowToUser, id, otherId);
     }
 }

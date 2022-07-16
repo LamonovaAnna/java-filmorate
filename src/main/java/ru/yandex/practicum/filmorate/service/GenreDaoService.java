@@ -10,6 +10,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.constant.Constant.QUERY_GET_ALL_GENRES;
+import static ru.yandex.practicum.filmorate.constant.Constant.QUERY_GET_GENRE_BY_ID;
+
 @Slf4j
 @Service
 public class GenreDaoService {
@@ -21,14 +24,12 @@ public class GenreDaoService {
     }
 
     public List<Genre> getGenres() {
-        String sqlQuery = "SELECT * FROM genres";
-        return jdbcTemplate.query(sqlQuery, RowTo::mapRowToGenre);
+        return jdbcTemplate.query(QUERY_GET_ALL_GENRES, RowTo::mapRowToGenre);
     }
 
     public Genre findGenreById(long id) {
         if(id > 0) {
-            String sqlQuery = "SELECT * FROM genres WHERE genre_id = ?";
-            return jdbcTemplate.queryForObject(sqlQuery, RowTo::mapRowToGenre, id);
+            return jdbcTemplate.queryForObject(QUERY_GET_GENRE_BY_ID, RowTo::mapRowToGenre, id);
         }
         log.debug("Incorrect id");
         throw new GenreNotFoundException(String.format("Film with id %d not found", id));
