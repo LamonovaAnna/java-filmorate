@@ -18,9 +18,9 @@ public class UserDaoService {
 
     private final UserStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
-    private static final String QUERY_ADD_FRIEND = "INSERT INTO friends" +
-            " (request_user_id, accept_user_id, is_accepted)" +
-            " VALUES (?, ?, ?)";
+    private static final String QUERY_ADD_FRIEND = "INSERT INTO friends " +
+            "(request_user_id, accept_user_id, is_accepted) " +
+            "VALUES (?, ?, ?)";
     private static final String QUERY_DELETE_FRIEND = "DELETE FROM friends WHERE request_user_id = ? " +
             "AND accept_user_id = ?";
     private static final String GET_ALL_FRIENDS = "SELECT * " +

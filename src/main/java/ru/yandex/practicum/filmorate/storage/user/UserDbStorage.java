@@ -18,8 +18,16 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class UserDbStorage implements UserStorage{
+public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static final String QUERY_CREATE_USER = "INSERT INTO users (user_name, login, email, birthday) " +
+            "VALUES (?, ?, ?, ?)";
+    private static final String QUERY_UPDATE_USER = "UPDATE users " +
+            "SET user_name = ?, login = ?, email = ?, birthday = ? " +
+            "WHERE user_id = ?";
+    private static final String QUERY_GET_ALL_USERS = "SELECT * FROM users";
+    private static final String QUERY_GET_USER_BY_ID = "SELECT * FROM users WHERE user_id = ?";
+    private static final String QUERY_DELETE_USER = "DELETE FROM users WHERE user_id = ?";
 
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
@@ -29,10 +37,9 @@ public class UserDbStorage implements UserStorage{
     @Override
     public User createUser(User user) throws ValidationException {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        if(validate(user)) {
-            String sqlQuery = "INSERT INTO users (user_name, login, email, birthday) VALUES (?, ?, ?, ?)";
+        if (validate(user)) {
             jdbcTemplate.update(con -> {
-                PreparedStatement stmt = con.prepareStatement(sqlQuery, new String[]{("user_id")});
+                PreparedStatement stmt = con.prepareStatement(QUERY_CREATE_USER, new String[]{("user_id")});
                 stmt.setString(1, user.getName());
                 stmt.setString(2, user.getLogin());
                 stmt.setString(3, user.getEmail());
@@ -45,13 +52,10 @@ public class UserDbStorage implements UserStorage{
         return user;
     }
 
-
     @Override
     public User updateUser(User user) throws ValidationException {
         if(validate(user)) {
-            String sqlQuery = "UPDATE users SET user_name = ?, login = ?, email = ?, birthday = ? " +
-                        "WHERE user_id = ?";
-            jdbcTemplate.update(sqlQuery,
+            jdbcTemplate.update(QUERY_UPDATE_USER,
                     user.getName(),
                     user.getLogin(),
                     user.getEmail(),
@@ -64,8 +68,7 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public List<User> getUsers() {
-        String sqlQuery = "SELECT * FROM users";
-        return jdbcTemplate.query(sqlQuery, RowTo::mapRowToUser);
+        return jdbcTemplate.query(QUERY_GET_ALL_USERS, RowTo::mapRowToUser);
     }
 
     @Override
@@ -73,14 +76,12 @@ public class UserDbStorage implements UserStorage{
         if(id <= 0) {
             throw new UserNotFoundException(String.format("User with id %d wasn't found", id));
         }
-        String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, RowTo::mapRowToUser, id);
+        return jdbcTemplate.queryForObject(QUERY_GET_USER_BY_ID, RowTo::mapRowToUser, id);
     }
 
     @Override
     public void deleteUser(long id) {
-        String sqlQuery = "DELETE FROM usres WHERE user_id = ?";
-        jdbcTemplate.update(sqlQuery, id);
+        jdbcTemplate.update(QUERY_DELETE_USER, id);
     }
 
     private boolean validate(User user) throws ValidationException {

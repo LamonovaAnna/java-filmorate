@@ -20,9 +20,22 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class FilmDbStorage implements FilmStorage{
+public class FilmDbStorage implements FilmStorage {
+
     private final JdbcTemplate jdbcTemplate;
     private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
+    private static final String QUERY_CREATE_FILM = "INSERT INTO films" +
+            " (film_name, description, rate, release_date, duration, mpa_rating_id)" +
+            " VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String QUERY_UPDATE_FILM = "UPDATE films" +
+            " SET film_name = ?, description = ?, rate = ?," +
+            " release_date = ?, duration = ?, mpa_rating_id = ?" +
+            " WHERE film_id = ?";
+    private static final String QUERY_GET_ALL_FILMS = "SELECT * FROM films";
+    private static final String QUERY_GET_FILM_BY_ID = "SELECT * FROM films WHERE film_id = ?";
+    private static final String QUERY_DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
+    private static final String QUERY_DELETE_GENRE_FROM_FILM = "DELETE FROM film_genres WHERE film_id = ?";
+    private static final String QUERY_SET_GENRE_TO_FILM = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -32,12 +45,9 @@ public class FilmDbStorage implements FilmStorage{
     @Override
     public Film createFilm(Film film) throws ValidationException {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        if(validate(film)) {
-            String sqlQuery = "INSERT INTO films" +
-                    " (film_name, description, rate, release_date, duration, mpa_rating_id)" +
-                    " VALUES (?, ?, ?, ?, ?, ?)";
+        if (validate(film)) {
             jdbcTemplate.update(con -> {
-                PreparedStatement stmt = con.prepareStatement(sqlQuery, new String[]{("film_id")});
+                PreparedStatement stmt = con.prepareStatement(QUERY_CREATE_FILM, new String[]{("film_id")});
                 stmt.setString(1, film.getName());
                 stmt.setString(2, film.getDescription());
                 stmt.setInt(3, film.getRate());
@@ -59,11 +69,7 @@ public class FilmDbStorage implements FilmStorage{
     @Override
     public Film updateFilm(Film film) throws ValidationException {
         if(validate(film)) {
-            String sqlQuery = "UPDATE films" +
-                    " SET film_name = ?, description = ?, rate = ?," +
-                    " release_date = ?, duration = ?, mpa_rating_id = ?" +
-                    " WHERE film_id = ?";
-            jdbcTemplate.update(sqlQuery,
+            jdbcTemplate.update(QUERY_UPDATE_FILM,
                     film.getName(),
                     film.getDescription(),
                     film.getRate(),
@@ -82,15 +88,13 @@ public class FilmDbStorage implements FilmStorage{
 
     @Override
     public List<Film> getFilms() {
-        String sqlQuery = "SELECT * FROM films";
-        return jdbcTemplate.query(sqlQuery, RowTo::mapRowToFilm);
+        return jdbcTemplate.query(QUERY_GET_ALL_FILMS, RowTo::mapRowToFilm);
     }
 
     @Override
     public Film findFilmById(long id) {
         if (id > 0) {
-            String sqlQuery = "SELECT * FROM films WHERE film_id = ?";
-            return jdbcTemplate.queryForObject(sqlQuery, RowTo::mapRowToFilm, id);
+            return jdbcTemplate.queryForObject(QUERY_GET_FILM_BY_ID, RowTo::mapRowToFilm, id);
         }
         log.debug("Incorrect id");
         throw new FilmNotFoundException(String.format("Film with id %d not found", id));
@@ -98,20 +102,17 @@ public class FilmDbStorage implements FilmStorage{
 
     @Override
     public void deleteFilm(long id) {
-        String sqlQuery = "DELETE FROM films WHERE film_id = ?";
-        jdbcTemplate.update(sqlQuery, id);
+        jdbcTemplate.update(QUERY_DELETE_FILM, id);
     }
 
     private void setFilmGenresValues(Film film) {
-        String sqlQuery = "DELETE FROM film_genres WHERE film_id = ?";
-        String sqlQueryGenre = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
         if (film.getGenres() != null) {
             if (film.getGenres().isEmpty()) {
-                jdbcTemplate.update(sqlQuery, film.getId());
+                jdbcTemplate.update(QUERY_DELETE_GENRE_FROM_FILM, film.getId());
             } else {
-                jdbcTemplate.update(sqlQuery, film.getId());
+                jdbcTemplate.update(QUERY_DELETE_GENRE_FROM_FILM, film.getId());
                 for (Genre genre : film.getGenres()) {
-                    jdbcTemplate.update(sqlQueryGenre, film.getId(), genre.getId());
+                    jdbcTemplate.update(QUERY_SET_GENRE_TO_FILM, film.getId(), genre.getId());
                 }
             }
         }
