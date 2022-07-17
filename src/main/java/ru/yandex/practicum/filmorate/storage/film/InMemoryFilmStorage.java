@@ -11,14 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.yandex.practicum.filmorate.constant.Constant.MOVIE_BIRTHDAY;
-
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
     private long filmId = 1;
+    private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     private long generateId() {
         return filmId++;

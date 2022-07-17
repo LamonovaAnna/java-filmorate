@@ -10,13 +10,13 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.constant.Constant.QUERY_GET_ALL_GENRES;
-import static ru.yandex.practicum.filmorate.constant.Constant.QUERY_GET_GENRE_BY_ID;
-
 @Slf4j
 @Service
 public class GenreDaoService {
+
     private final JdbcTemplate jdbcTemplate;
+    private static final String QUERY_GET_ALL_GENRES = "SELECT * FROM genres";
+    private static final String QUERY_GET_GENRE_BY_ID = "SELECT * FROM genres WHERE genre_id = ?";
 
     @Autowired
     public GenreDaoService(JdbcTemplate jdbcTemplate) {

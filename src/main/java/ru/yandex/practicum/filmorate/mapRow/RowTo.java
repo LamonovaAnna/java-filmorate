@@ -12,12 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 
-import static ru.yandex.practicum.filmorate.constant.Constant.*;
-
 @Component
 public class RowTo {
 
     private static JdbcTemplate jdbcTemplate;
+    private static final String QUERY_GET_MPA_BY_ID = "SELECT * FROM mpa_ratings WHERE mpa_rating_id = ?";
+    private static final String QUERY_GET_GENRE_BY_FILM_ID = "SELECT * FROM genres JOIN film_genres " +
+            "AS fg ON genres.genre_id = fg.genre_id  " +
+            "WHERE fg.film_id = ?";
 
     @Autowired
     public RowTo(JdbcTemplate jdbcTemplate) {

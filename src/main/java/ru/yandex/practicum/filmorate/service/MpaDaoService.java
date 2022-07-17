@@ -10,13 +10,13 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.constant.Constant.QUERY_GET_ALL_MPA;
-import static ru.yandex.practicum.filmorate.constant.Constant.QUERY_GET_MPA_BY_ID;
-
 @Slf4j
 @Service
 public class MpaDaoService {
+
     private final JdbcTemplate jdbcTemplate;
+    private static final String QUERY_GET_MPA_BY_ID = "SELECT * FROM mpa_ratings WHERE mpa_rating_id = ?";
+    private static final String QUERY_GET_ALL_MPA = "SELECT * FROM mpa_ratings";
 
     @Autowired
     public MpaDaoService(JdbcTemplate jdbcTemplate) {

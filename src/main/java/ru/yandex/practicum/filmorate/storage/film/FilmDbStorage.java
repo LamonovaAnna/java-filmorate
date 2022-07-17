@@ -14,16 +14,15 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-
-import static ru.yandex.practicum.filmorate.constant.Constant.MOVIE_BIRTHDAY;
-
 
 @Slf4j
 @Component
 public class FilmDbStorage implements FilmStorage{
     private final JdbcTemplate jdbcTemplate;
+    private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {

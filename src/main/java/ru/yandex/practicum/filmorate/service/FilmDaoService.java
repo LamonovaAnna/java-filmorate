@@ -12,14 +12,23 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.constant.Constant.*;
-
 @Slf4j
 @Service
 public class FilmDaoService {
+
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
+    private static final String QUERY_ADD_LIKE_TO_FILM = "INSERT INTO film_likes" +
+            " (film_id, user_id)" +
+            " VALUES (?, ?)";
+    private static final String QUERY_DELETE_FROM_FILM = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+    private static final String QUERY_GET_POPULAR_FILMS = "SELECT f.* " +
+            "FROM films AS f " +
+            "LEFT JOIN film_likes AS fl ON f.film_id=fl.film_id " +
+            "GROUP BY f.film_id " +
+            "ORDER BY COUNT(fl.user_id) DESC " +
+            "LIMIT ?";
 
     @Autowired
     public FilmDaoService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
