@@ -55,12 +55,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findById(long id) {
+    public User findUserById(long id) {
         if (!users.containsKey(id)) {
             log.debug("Incorrect id");
             throw new UserNotFoundException(String.format("User with id %d wasn't found", id));
         }
         return users.get(id);
+    }
+
+    @Override
+    public void deleteUser(long id) {
+        users.remove(id);
     }
 
     private boolean validate(User user) throws ValidationException {

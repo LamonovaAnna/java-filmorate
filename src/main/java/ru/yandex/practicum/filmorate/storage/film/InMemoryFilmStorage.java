@@ -16,8 +16,8 @@ import java.util.Map;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
-    private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
     private long filmId = 1;
+    private static final LocalDate MOVIE_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     private long generateId() {
         return filmId++;
@@ -62,6 +62,10 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new FilmNotFoundException(String.format("Film with id %d not found", id));
         }
         return films.get(id);
+    }
+
+    public void deleteFilm(long id) {
+        films.remove(id);
     }
 
     private boolean validate(Film film) throws ValidationException {

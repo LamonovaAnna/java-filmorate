@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmDaoService;
 
 import java.util.List;
 
@@ -13,32 +13,37 @@ import java.util.List;
 
 @RestController
 public class FilmController {
-    private final FilmService filmService;
+    private final FilmDaoService filmService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmDaoService filmService) {
         this.filmService = filmService;
     }
 
 
     @PostMapping("/films")
     public Film createFilm(@RequestBody Film film) throws ValidationException {
-        return filmService.getFilmStorage().createFilm(film);
+        return filmService.createFilm(film);
     }
 
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
-        return filmService.getFilmStorage().updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @GetMapping("/films")
     public List<Film> getFilms() {
-        return filmService.getFilmStorage().getFilms();
+        return filmService.getFilms();
     }
 
     @GetMapping("/films/{id}")
     public Film findFilmById(@PathVariable long id) {
-        return filmService.getFilmStorage().findFilmById(id);
+        return filmService.findFilmById(id);
+    }
+
+    @DeleteMapping("/films/{id}")
+    public void deleteFilm(@PathVariable long id) {
+        filmService.deleteFilm(id);
     }
 
     @PutMapping("/films/{id}/like/{userId}")
@@ -58,8 +63,4 @@ public class FilmController {
         }
         return filmService.getPopularFilms(count);
     }
-
-
-
-
 }

@@ -2,32 +2,41 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.mapRow.RowTo;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class FilmService {
+public class FilmDaoService {
+
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final JdbcTemplate jdbcTemplate;
+    private static final String QUERY_ADD_LIKE_TO_FILM = "INSERT INTO film_likes" +
+            " (film_id, user_id)" +
+            " VALUES (?, ?)";
+    private static final String QUERY_DELETE_FROM_FILM = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+    private static final String QUERY_GET_POPULAR_FILMS = "SELECT f.* " +
+            "FROM films AS f " +
+            "LEFT JOIN film_likes AS fl ON f.film_id=fl.film_id " +
+            "GROUP BY f.film_id " +
+            "ORDER BY COUNT(fl.user_id) DESC " +
+            "LIMIT ?";
 
     @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage, InMemoryUserStorage userStorage) {
+    public FilmDaoService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                          @Qualifier("userDbStorage") UserStorage userStorage,
+                          JdbcTemplate jdbcTemplate) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-    }
-
-    public FilmStorage getFilmStorage() {
-        return filmStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Film createFilm(Film film) {
@@ -52,32 +61,19 @@ public class FilmService {
 
     public void addLike(long id, long userId) {
         if (filmStorage.findFilmById(id) != null && userStorage.findUserById(userId) != null) {
-            filmStorage.findFilmById(id).getLikes().add(userId);
+            jdbcTemplate.update(QUERY_ADD_LIKE_TO_FILM, id, userId);
             log.info("User with id {} liked film with id {}", userId, id);
         }
     }
 
     public void deleteLike(long id, long userId) {
         if (filmStorage.findFilmById(id) != null && userStorage.findUserById(userId) != null) {
-            filmStorage.findFilmById(id).getLikes().remove(userId);
+            jdbcTemplate.update(QUERY_DELETE_FROM_FILM, id, userId);
             log.info("User with id {} deleted like for film with id {}", userId, id);
         }
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        if (count > 0) {
-            if (count <= filmStorage.getFilms().size()) {
-                return filmStorage.getFilms().stream()
-                        .sorted(Comparator.comparingInt(f0 -> -(f0.getLikes().size())))
-                        .limit(count)
-                        .collect(Collectors.toList());
-            } else {
-                return filmStorage.getFilms().stream()
-                        .sorted(Comparator.comparingInt(f0 -> -(f0.getLikes().size())))
-                        .collect(Collectors.toList());
-            }
-        } else {
-            throw new IncorrectParameterException("count " + count);
-        }
+        return jdbcTemplate.query(QUERY_GET_POPULAR_FILMS, RowTo::mapRowToFilm, count);
     }
 }

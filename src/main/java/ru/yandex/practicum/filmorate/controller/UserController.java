@@ -4,38 +4,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.UserDaoService;
 
 import java.util.List;
 
 
 @RestController
 public class UserController {
-    private final UserService userService;
+    private final UserDaoService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserDaoService userService) {
         this.userService = userService;
     }
 
     @PostMapping("/users")
     public User createUser(@RequestBody User user) throws ValidationException {
-        return userService.getUserStorage().createUser(user);
+        return userService.createUser(user);
     }
 
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) throws ValidationException {
-        return userService.getUserStorage().updateUser(user);
+        return userService.updateUser(user);
     }
 
     @GetMapping("/users")
     public List<User> getUsers() {
-        return userService.getUserStorage().getUsers();
+        return userService.getUsers();
     }
 
     @GetMapping("/users/{id}")
     public User findUserById(@PathVariable long id) {
-        return userService.getUserStorage().findById(id);
+        return userService.findUserById(id);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteFilm(@PathVariable long id) {
+        userService.deleteUser(id);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
